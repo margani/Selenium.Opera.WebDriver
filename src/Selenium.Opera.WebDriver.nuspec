@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Selenium.Opera.WebDriver</id>
+    <title>Selenium.Opera.WebDriver  (Win32, macOS, and Linux64)</title>
+    <version>2.30.0.0</version>
+    <authors>Hossein Margani</authors>
+    <summary>Selenium Opera Driver (Win32, macOS, and Linux64)</summary>
+    <description>Install Opera Driver (Win32, Win64, macOS, and Linux64) for Selenium WebDriver into your Unit Test Project.
+      "operadriver(.exe)" is copied to bin folder from package folder when the build process. "operadriver(.exe)" is licensed under the New BSD License.</description>
+    <language>en-US</language>
+    <projectUrl>https://github.com/margani/Selenium.Opera.WebDriver</projectUrl>
+    <licenseUrl>http://unlicense.org</licenseUrl>
+    <tags>Selenium Opera WebDriver</tags>
+    <releaseNotes>
+      <![CDATA[
+	    v.2.30.0.0
+      - Opera Driver 2.30 release
+      ]]>
+    </releaseNotes>
+  </metadata>
+  <files>
+    <file src="..\downloads\win32\operadriver.exe" target="driver/win32"/>
+    <file src="..\downloads\win64\operadriver.exe" target="driver/win64"/>
+    <file src="..\downloads\mac64\operadriver" target="driver/mac64/operadriver"/>
+    <file src="..\downloads\linux64\operadriver" target="driver/linux64/operadriver"/>
+    <file src="Selenium.WebDriver.OperaDriver.targets" target="build"/>
+  </files>
+</package>

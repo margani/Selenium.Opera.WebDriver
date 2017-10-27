@@ -1,0 +1,71 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Detect OS platform -->
+  <PropertyGroup>
+    <WebDriverPlatform Condition=" '$(WebDriverPlatform)' == '' And '$(OS)' == 'Windows_NT' ">win32</WebDriverPlatform>
+    <WebDriverPlatform Condition=" '$(WebDriverPlatform)' == '' And '$(OS)' == 'Unix' And Exists ('/Applications') ">mac64</WebDriverPlatform>
+    <WebDriverPlatform Condition=" '$(WebDriverPlatform)' == '' And '$(OS)' == 'Unix' ">linux64</WebDriverPlatform>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OperaDriverName Condition="'$(WebDriverPlatform)' == 'win32'">OperaDriver.exe</OperaDriverName>
+    <OperaDriverName Condition="'$(OperaDriverName)' == ''">OperaDriver</OperaDriverName>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OperaDriverSrcPath>$(MSBuildThisFileDirectory)..\driver\$(WebDriverPlatform)\$(OperaDriverName)</OperaDriverSrcPath>
+    <OperaDriverTargetPath Condition=" '$(OperaDriverTargetPath)' == '' ">$(TargetDir)</OperaDriverTargetPath>
+  </PropertyGroup>
+
+  <Target Name="ChmodOperaDriver" BeforeTargets="BeforeBuild" Condition="'$(WebDriverPlatform)' != 'win32'">
+    <Exec Command="chmod +x &quot;$(OperaDriverSrcPath)&quot;" />
+  </Target>
+
+  <!-- Detect is project type Web or Not. -->
+  <Choose>
+    <When Condition="'$(ProjectTypeIsWeb)' == ''">
+      <PropertyGroup>
+        <ProjectTypeGuidsPadded Condition="'$(ProjectTypeGuidsPadded)' == ''">;$(ProjectTypeGuids);</ProjectTypeGuidsPadded>
+        <!-- Reference: http://www.mztools.com/Articles/2008/MZ2008017.aspx -->
+        <!-- HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\VisualStudio\14.0\Projects -->
+        <ProjectTypeIsWeb Condition="$(ProjectTypeGuidsPadded.IndexOf(';{349c5851-65df-11da-9384-00065b846f21};')) != -1">true</ProjectTypeIsWeb>
+        <ProjectTypeIsWeb Condition="'$(ProjectTypeIsWeb)' == ''">false</ProjectTypeIsWeb>
+      </PropertyGroup>
+    </When>
+  </Choose>
+  <!-- Detect definition of compilation symbol that is "_PUBLISH_OperaDriver", or "PublishOperaDriver" msbuild property. -->
+  <Choose>
+    <When Condition="'$(PublishOperaDriver)' == ''">
+      <PropertyGroup>
+        <DefineConstantsPadded Condition="'$(DefineConstantsPadded)' == ''">;$(DefineConstants);</DefineConstantsPadded>
+        <PublishOperaDriver Condition="$(DefineConstantsPadded.IndexOf(';_PUBLISH_OperaDriver;')) != -1">true</PublishOperaDriver>
+        <PublishOperaDriver Condition="'$(PublishOperaDriver)' == ''">false</PublishOperaDriver>
+      </PropertyGroup>
+    </When>
+  </Choose>
+  <!-- Setup driver file as project item if publishing driver file is enabled. -->
+  <Choose>
+    <When Condition="'$(PublishOperaDriver)|$(ProjectTypeIsWeb)' == 'true|true'">
+      <ItemGroup>
+        <None Include="$(OperaDriverSrcPath)">
+          <Link>$(OperaDriverName)</Link>
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          <Visible>False</Visible>
+        </None>
+      </ItemGroup>
+    </When>
+    <When Condition="'$(PublishOperaDriver)|$(ProjectTypeIsWeb)' == 'true|false'">
+      <ItemGroup>
+        <Content Include="$(OperaDriverSrcPath)">
+          <Link>$(OperaDriverName)</Link>
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          <Visible>False</Visible>
+        </Content>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <!-- If publishing driver file is disabled (it's default behavior), define "copy" and "clean" build task. -->
+  <Target Name="CopyOperaDriverToBin" BeforeTargets="AfterBuild" Condition="'$(PublishOperaDriver)' == 'false'">
+    <Copy SourceFiles="$(OperaDriverSrcPath)" DestinationFiles="$(OperaDriverTargetPath)$(OperaDriverName)" SkipUnchangedFiles="true"></Copy>
+  </Target>
+  <Target Name="DeleteOperaDriverFromBin" BeforeTargets="AfterClean" Condition="'$(PublishOperaDriver)' == 'false'">
+    <Delete Files="$(OperaDriverTargetPath)$(OperaDriverName)"></Delete>
+  </Target>
+</Project>
